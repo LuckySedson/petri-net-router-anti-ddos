@@ -23,10 +23,14 @@ export default function App() {
     fetchState().then(setState).catch(() => {})
     fetchSimulationStatus().then((s) => setSimulationRunning(s.running)).catch(() => {})
 
-    const client = connectWebSocket((newState) => {
-      setState(newState)
-      setConnected(true)
-    })
+    const client = connectWebSocket(
+      (newState) => {
+        setState(newState)
+      },
+      () => {
+        setConnected(true)
+      }
+    )
     wsClientRef.current = client
 
     return () => {
@@ -63,6 +67,8 @@ export default function App() {
     const newState = await sendReset()
     setState(newState)
   }
+
+  console.log('Rendu App, connected =', connected)
 
   return (
     <div className="app">

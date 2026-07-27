@@ -115,10 +115,16 @@ public class RouterPetriNetService {
         lock.lock();
         try {
             if (forceArrival || random.nextDouble() < 0.6) {
-                net.fire("T1");
+                boolean fired = net.fire("T1");
+                if (fired) {
+                    addLog("T1 — Paquet accepté. File P2=" + net.getPlace("P2").getTokens());
+                }
             }
             if (forceProcess || random.nextDouble() < 0.45) {
-                net.fire("T2");
+                boolean fired = net.fire("T2");
+                if (fired) {
+                    addLog("T2 — Paquet traité. File P2=" + net.getPlace("P2").getTokens());
+                }
             }
             checkAutoTransitions();
         } finally {

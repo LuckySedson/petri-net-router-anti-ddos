@@ -1,8 +1,8 @@
 import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client'
 
-const BASE_URL = 'http://localhost:8081/api/petrinet'
-const WS_URL = 'http://localhost:8081/ws'
+const BASE_URL = '/api/petrinet'
+const WS_URL = '/ws'
 
 export async function fetchState() {
   const res = await fetch(`${BASE_URL}/state`)
@@ -44,15 +44,23 @@ export async function fetchSimulationStatus() {
   return res.json()
 }
 
-export function connectWebSocket(onStateUpdate) {
+export function connectWebSocket(onStateUpdate, onConnected) {
   const client = new Client({
     webSocketFactory: () => new SockJS(WS_URL),
     reconnectDelay: 3000,
     onConnect: () => {
+      console.log('STOMP connecté')
+      if (onConnected) onConnected()
       client.subscribe('/topic/petrinet-state', (message) => {
         const state = JSON.parse(message.body)
         onStateUpdate(state)
       })
+    },
+    onStompError: (frame) => {
+      console.error('Erreur STOMP:', frame)
+    },
+    onWebSocketError: (event) => {
+      console.error('Erreur WebSocket:', event)
     }
   })
   client.activate()
