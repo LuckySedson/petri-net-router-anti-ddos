@@ -70,6 +70,15 @@ public class RouterController {
         return response;
     }
 
+    @PostMapping("/reset-counter")
+    public Map<String, Object> resetCounter() {
+        boolean processed = petriNetService.resetCounterAttempt();
+        Map<String, Object> response = new HashMap<>();
+        response.put("processed", processed);
+        response.put("state", petriNetService.getState());
+        return response;
+    }
+
     @PostMapping("/reset")
     public PetriNetStateDTO reset() {
         petriNetService.reset();

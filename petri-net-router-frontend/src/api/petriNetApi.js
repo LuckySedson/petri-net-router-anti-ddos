@@ -44,6 +44,11 @@ export async function fetchSimulationStatus() {
   return res.json()
 }
 
+export async function sendResetCounter() {
+  const res = await fetch(`${BASE_URL}/reset-counter`, { method: 'POST' })
+  return res.json()
+}
+
 export function connectWebSocket(onStateUpdate, onConnected) {
   const client = new Client({
     webSocketFactory: () => new SockJS(WS_URL),

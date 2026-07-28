@@ -5,7 +5,8 @@ export default function ControlPanel({
   onProcess,
   onDdos,
   onToggleSimulation,
-  onReset
+  onReset,
+  onResetCounter
 }) {
   return (
     <div className="control-panel">
@@ -16,6 +17,9 @@ export default function ControlPanel({
         </button>
         <button className="btn btn-process" onClick={onProcess}>
           Traiter un paquet (T2)
+        </button>
+        <button className="btn btn-process" onClick={onResetCounter}>
+          Réinjecter paquet traité (T5)
         </button>
       </div>
 

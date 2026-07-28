@@ -137,13 +137,26 @@ public class RouterPetriNetService {
                     addLog("T2 — Paquet traité. File P2=" + net.getPlace("P2").getTokens());
                 }
             }
-            if (random.nextDouble() < 0.3) {
-                boolean fired = net.fire("T5");
-                if (fired) {
-                    addLog("T5 — Paquet réinjecté. File P2=" + net.getPlace("P2").getTokens());
-                }
+            if (net.getPlace("P5").getTokens() >= 5) {
+                int count = net.getPlace("P5").getTokens();
+                net.getPlace("P5").removeTokens(count);
+                addLog("T5 — " + count + " paquets traités réinitialisés.");
             }
             checkAutoTransitions();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public boolean resetCounterAttempt() {
+        lock.lock();
+        try {
+            boolean fired = net.fire("T5");
+            if (fired) {
+                addLog("T5 — Paquet réinjecté dans la file. P2=" + net.getPlace("P2").getTokens());
+            }
+            checkAutoTransitions();
+            return fired;
         } finally {
             lock.unlock();
         }

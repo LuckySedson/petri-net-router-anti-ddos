@@ -7,6 +7,7 @@ import {
   sendDdos,
   sendProcess,
   sendReset,
+  sendResetCounter,
   startSimulation,
   stopSimulation
 } from './api/petriNetApi.js'
@@ -63,6 +64,11 @@ export default function App() {
     }
   }
 
+  async function handleResetCounter() {
+    const res = await sendResetCounter()
+    setState(res.state)
+  }
+
   async function handleReset() {
     const newState = await sendReset()
     setState(newState)
@@ -106,6 +112,7 @@ export default function App() {
             onDdos={handleDdos}
             onToggleSimulation={handleToggleSimulation}
             onReset={handleReset}
+            onResetCounter={handleResetCounter}
           />
         </aside>
       </main>
