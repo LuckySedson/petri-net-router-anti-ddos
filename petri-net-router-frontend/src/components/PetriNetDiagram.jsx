@@ -70,7 +70,7 @@ function TransitionNode({ id, fireable }) {
   )
 }
 
-function Arc({ from, to, dashed = false, curve = 0, waypoints = null }) {
+function Arc({ from, to, dashed = false, curve = 0, waypoints = null, active = false }) {
   let path
   if (waypoints) {
     const points = [from, ...waypoints, to]
@@ -80,16 +80,17 @@ function Arc({ from, to, dashed = false, curve = 0, waypoints = null }) {
     const midY = (from.y + to.y) / 2 + curve
     path = `M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`
   }
+  const cls = dashed ? 'arc arc-inhibitor' : active ? 'arc arc-active' : 'arc'
   return (
     <path
       d={path}
-      className={dashed ? 'arc arc-inhibitor' : 'arc'}
+      className={cls}
       markerEnd={dashed ? 'url(#inhibitor-end)' : 'url(#arrow-end)'}
     />
   )
 }
 
-export default function PetriNetDiagram({ state }) {
+export default function PetriNetDiagram({ state, activeArc }) {
   if (!state) return <div className="diagram-loading">Connexion au routeur…</div>
 
   const marking = state.marking || {}
@@ -111,26 +112,27 @@ export default function PetriNetDiagram({ state }) {
         <Arc from={{ x: 146, y: 110 }} to={{ x: 234, y: 110 }} />
 
         {/* T1 -> P2 */}
-        <Arc from={{ x: 266, y: 110 }} to={{ x: 364, y: 110 }} />
+        <Arc from={{ x: 266, y: 110 }} to={{ x: 364, y: 110 }} active={activeArc === 'T1-P2'} />
 
-        {/* T1 -> P1 (retour, arc courbe au-dessus) */}
+        {/* T1 -> P1 retour */}
         <Arc from={{ x: 250, y: 96 }} to={{ x: 146, y: 96 }} curve={-30} />
 
+        {/* P2 -> T2 */}
         <Arc from={{ x: 436, y: 110 }} to={{ x: 526, y: 110 }} />
 
         {/* T2 -> P5 */}
-        <Arc from={{ x: 554, y: 110 }} to={{ x: 634, y: 110 }} />
-
-        {/* T3 -> P3 (vertical) */}
-        <Arc from={{ x: 400, y: 239 }} to={{ x: 400, y: 304 }} />
+        <Arc from={{ x: 554, y: 110 }} to={{ x: 634, y: 110 }} active={activeArc === 'T2-P5'} />
 
         {/* P2 -> T3 */}
         <Arc from={{ x: 400, y: 146 }} to={{ x: 400, y: 211 }} />
 
-        {/* T3 -> P4 (courbe vers la droite, bien visible) */}
+        {/* T3 -> P3 */}
+        <Arc from={{ x: 400, y: 239 }} to={{ x: 400, y: 304 }} />
+
+        {/* T3 -> P4 */}
         <Arc from={{ x: 414, y: 232 }} to={{ x: 634, y: 304 }} curve={-40} />
 
-        {/* T3 -> P1 (consommation de P1 par T3) */}
+        {/* T3 consomme P1 */}
         <Arc from={{ x: 236, y: 110 }} to={{ x: 386, y: 211 }} curve={-30} />
 
         {/* P3 -> T4 */}
@@ -146,8 +148,9 @@ export default function PetriNetDiagram({ state }) {
         <Arc from={{ x: 670, y: 146 }} to={{ x: 670, y: 211 }} />
 
         {/* T5 -> P2 */}
-        <Arc from={{ x: 656, y: 239 }} to={{ x: 436, y: 120 }} curve={-30} />
+        <Arc from={{ x: 656, y: 239 }} to={{ x: 436, y: 120 }} curve={-30} active={activeArc === 'T5-P2'} />
 
+        {/* Inhibiteur P3 -> T1 */}
         <Arc
           from={{ x: 420, y: 326 }}
           to={{ x: 232, y: 104 }}
@@ -160,6 +163,7 @@ export default function PetriNetDiagram({ state }) {
           ]}
         />
 
+        {/* Inhibiteur P2 -> T4 */}
         <Arc
           from={{ x: 400, y: 146 }}
           to={{ x: 250, y: 358 }}
