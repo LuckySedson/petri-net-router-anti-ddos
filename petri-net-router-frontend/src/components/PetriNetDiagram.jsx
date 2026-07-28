@@ -2,28 +2,32 @@ const PLACE_POS = {
   P1: { x: 110, y: 110 },
   P2: { x: 400, y: 110 },
   P3: { x: 400, y: 340 },
-  P4: { x: 670, y: 340 }
+  P4: { x: 670, y: 340 },
+  P5: { x: 670, y: 110 }
 }
 
 const TRANSITION_POS = {
   T1: { x: 250, y: 110 },
   T2: { x: 540, y: 110 },
   T3: { x: 400, y: 225 },
-  T4: { x: 250, y: 340 }
+  T4: { x: 250, y: 340 },
+  T5: { x: 670, y: 225 }
 }
 
 const PLACE_LABELS = {
   P1: 'Entrée_Ouverte',
   P2: 'File_Attente',
   P3: 'Routeur_Saturé',
-  P4: 'Filtre_Actif'
+  P4: 'Filtre_Actif',
+  P5: 'Paquets_Traités'
 }
 
 const TRANSITION_LABELS = {
   T1: 'Arrivée_Paquet',
   T2: 'Traiter_Paquet',
   T3: 'Déclencher_Protection',
-  T4: 'Réinitialiser_Sécurité'
+  T4: 'Réinitialiser_Sécurité',
+  T5: 'Réinitialiser_Compteur'
 }
 
 function Tokens({ cx, cy, count }) {
@@ -43,10 +47,10 @@ function Tokens({ cx, cy, count }) {
   )
 }
 
-function PlaceNode({ id, tokens, isAlert }) {
+function PlaceNode({ id, tokens, isAlert, isActive }) {
   const { x, y } = PLACE_POS[id]
   return (
-    <g className={`place-node ${isAlert ? 'place-alert' : ''}`}>
+    <g className={`place-node ${isAlert ? 'place-alert' : ''} ${isActive ? 'place-active' : ''}`}>
       <circle cx={x} cy={y} r="36" className="place-circle" />
       <Tokens cx={x} cy={y} count={tokens} />
       <text x={x} y={y - 50} textAnchor="middle" className="node-id">{id}</text>
@@ -93,7 +97,7 @@ export default function PetriNetDiagram({ state }) {
 
   return (
     <div className="diagram-wrapper">
-      <svg viewBox="0 0 760 450" className="petri-svg">
+      <svg viewBox="0 0 800 450" className="petri-svg">
         <defs>
           <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
             <path d="M0,0 L0,6 L9,3 z" className="arrow-head" />
@@ -103,18 +107,46 @@ export default function PetriNetDiagram({ state }) {
           </marker>
         </defs>
 
-        <Arc from={{ x: 166, y: 110 }} to={{ x: 234, y: 110 }} />
+        {/* P1 -> T1 */}
+        <Arc from={{ x: 146, y: 110 }} to={{ x: 234, y: 110 }} />
+
+        {/* T1 -> P2 */}
         <Arc from={{ x: 266, y: 110 }} to={{ x: 364, y: 110 }} />
+
+        {/* T1 -> P1 (retour, arc courbe au-dessus) */}
+        <Arc from={{ x: 250, y: 96 }} to={{ x: 146, y: 96 }} curve={-30} />
 
         <Arc from={{ x: 436, y: 110 }} to={{ x: 526, y: 110 }} />
 
-        <Arc from={{ x: 400, y: 146 }} to={{ x: 400, y: 211 }} />
-        <Arc from={{ x: 400, y: 239 }} to={{ x: 400, y: 304 }} />
-        <Arc from={{ x: 414, y: 232 }} to={{ x: 656, y: 326 }} curve={10} />
+        {/* T2 -> P5 */}
+        <Arc from={{ x: 554, y: 110 }} to={{ x: 634, y: 110 }} />
 
+        {/* T3 -> P3 (vertical) */}
+        <Arc from={{ x: 400, y: 239 }} to={{ x: 400, y: 304 }} />
+
+        {/* P2 -> T3 */}
+        <Arc from={{ x: 400, y: 146 }} to={{ x: 400, y: 211 }} />
+
+        {/* T3 -> P4 (courbe vers la droite, bien visible) */}
+        <Arc from={{ x: 414, y: 232 }} to={{ x: 634, y: 304 }} curve={-40} />
+
+        {/* T3 -> P1 (consommation de P1 par T3) */}
+        <Arc from={{ x: 236, y: 110 }} to={{ x: 386, y: 211 }} curve={-30} />
+
+        {/* P3 -> T4 */}
         <Arc from={{ x: 374, y: 340 }} to={{ x: 264, y: 340 }} />
+
+        {/* P4 -> T4 */}
         <Arc from={{ x: 670, y: 326 }} to={{ x: 270, y: 348 }} curve={26} />
+
+        {/* T4 -> P1 */}
         <Arc from={{ x: 240, y: 326 }} to={{ x: 128, y: 144 }} curve={-30} />
+
+        {/* P5 -> T5 */}
+        <Arc from={{ x: 670, y: 146 }} to={{ x: 670, y: 211 }} />
+
+        {/* T5 -> P2 */}
+        <Arc from={{ x: 656, y: 239 }} to={{ x: 436, y: 120 }} curve={-30} />
 
         <Arc
           from={{ x: 420, y: 326 }}
@@ -139,16 +171,17 @@ export default function PetriNetDiagram({ state }) {
           ]}
         />
 
-        {['P1', 'P2', 'P3', 'P4'].map((id) => (
+        {['P1', 'P2', 'P3', 'P4', 'P5'].map((id) => (
           <PlaceNode
             key={id}
             id={id}
             tokens={marking[id] ?? 0}
             isAlert={id === 'P3' && (marking[id] ?? 0) > 0}
+            isActive={id === 'P4' && (marking[id] ?? 0) > 0}
           />
         ))}
 
-        {['T1', 'T2', 'T3', 'T4'].map((id) => (
+        {['T1', 'T2', 'T3', 'T4', 'T5'].map((id) => (
           <TransitionNode key={id} id={id} fireable={fireable.has(id)} />
         ))}
       </svg>

@@ -353,3 +353,14 @@ body {
   border-left-color: var(--accent-ok);
   color: var(--accent-ok);
 }
+
+.place-active .place-circle {
+  stroke: var(--accent-amber);
+  fill: rgba(255, 184, 77, 0.08);
+  animation: active-glow 1.4s infinite;
+}
+
+@keyframes active-glow {
+  0%, 100% { filter: drop-shadow(0 0 0px var(--accent-amber)); }
+  50% { filter: drop-shadow(0 0 10px var(--accent-amber)); }
+}

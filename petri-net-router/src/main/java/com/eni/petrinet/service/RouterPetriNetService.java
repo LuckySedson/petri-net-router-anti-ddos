@@ -39,18 +39,23 @@ public class RouterPetriNetService {
         Place p2 = new Place("P2", "File_Attente_Paquets", 0);
         Place p3 = new Place("P3", "Routeur_Saturé", 0);
         Place p4 = new Place("P4", "Filtre_Actif", 0);
+        Place p5 = new Place("P5", "Paquets_Traités", 0);
 
         net.addPlace(p1);
         net.addPlace(p2);
         net.addPlace(p3);
         net.addPlace(p4);
+        net.addPlace(p5);
 
         Transition t1 = new Transition("T1", "Arrivée_Paquet");
+        t1.addInput(p1, 1);
         t1.addOutput(p2, 1);
+        t1.addOutput(p1, 1);
         t1.addInhibitor(p3);
 
         Transition t2 = new Transition("T2", "Traiter_Paquet");
         t2.addInput(p2, 1);
+        t2.addOutput(p5, 1);
 
         Transition t3 = new Transition("T3", "Déclencher_Protection");
         t3.addInput(p2, threshold);
@@ -63,6 +68,11 @@ public class RouterPetriNetService {
         t4.addInput(p4, 1);
         t4.addOutput(p1, 1);
         t4.addInhibitor(p2);
+
+        Transition t5 = new Transition("T5", "Réinitialiser_Compteur");
+        t5.addInput(p5, 1);
+        t5.addOutput(p2, 1);
+        net.addTransition(t5);
 
         net.addTransition(t1);
         net.addTransition(t2);
@@ -127,6 +137,12 @@ public class RouterPetriNetService {
                     addLog("T2 — Paquet traité. File P2=" + net.getPlace("P2").getTokens());
                 }
             }
+            if (random.nextDouble() < 0.3) {
+                boolean fired = net.fire("T5");
+                if (fired) {
+                    addLog("T5 — Paquet réinjecté. File P2=" + net.getPlace("P2").getTokens());
+                }
+            }
             checkAutoTransitions();
         } finally {
             lock.unlock();
@@ -141,6 +157,7 @@ public class RouterPetriNetService {
             net.getPlace("P2").removeTokens(net.getPlace("P2").getTokens());
             net.getPlace("P3").removeTokens(net.getPlace("P3").getTokens());
             net.getPlace("P4").removeTokens(net.getPlace("P4").getTokens());
+            net.getPlace("P5").removeTokens(net.getPlace("P5").getTokens());
             log.clear();
             addLog("Réseau réinitialisé manuellement.");
         } finally {
