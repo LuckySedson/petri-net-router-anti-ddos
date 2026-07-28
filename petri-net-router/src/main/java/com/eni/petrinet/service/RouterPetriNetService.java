@@ -104,6 +104,7 @@ public class RouterPetriNetService {
         if (net.getTransition("T3").isFireable()) {
             net.fire("T3");
             addLog("⚠ T3 — SATURATION DÉTECTÉE (P2 >= " + threshold + "). Entrée fermée, filtre activé.");
+            return;
         }
         if (net.getTransition("T4").isFireable()) {
             net.fire("T4");

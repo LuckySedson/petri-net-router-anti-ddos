@@ -11,7 +11,7 @@ import com.eni.petrinet.dto.PetriNetStateDTO;
 @Component
 public class PetriNetSimulationRunner {
 
-    private static final long INTERVAL_MS = 800; // rythme simulation auto
+    private static final long INTERVAL_MS = 400; // rythme simulation auto
 
     private final RouterPetriNetService petriNetService;
     private final SimpMessagingTemplate messagingTemplate;
